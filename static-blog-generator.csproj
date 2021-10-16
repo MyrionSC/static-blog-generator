@@ -6,4 +6,19 @@
     <RootNamespace>static_blog_generator</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Google.Apis.Discovery.v1" Version="1.55.0" />
+    <PackageReference Include="Google.Apis.Docs.v1" Version="1.55.0.2379" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.55.0.2453" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="creds\credentials.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="creds\service-account-creds.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
