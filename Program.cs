@@ -1,17 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Discovery.v1;
-using Google.Apis.Discovery.v1.Data;
 using Google.Apis.Docs.v1;
 using Google.Apis.Docs.v1.Data;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+using Newtonsoft.Json;
+using File = Google.Apis.Drive.v3.Data.File;
 
 namespace static_blog_generator
 {
+    class ListDict
+    {
+        public Dictionary<string, List<string>> d = new();
+
+        public void Add(string key, string str)
+        {
+            if (d.ContainsKey(key)) {
+                d[key].Add(str);
+            }
+            else {
+                d[key] = new List<string> { str };
+            }
+        }
+
+        public List<string> Get(string key)
+        {
+            return d[key];
+        }
+    }
+
     class Program
     {
         // If modifying these scopes, delete your previously saved credentials
@@ -21,34 +43,94 @@ namespace static_blog_generator
 
         static async Task Main(string[] args)
         {
-            GoogleCredential credential;
-            using (var stream =
-                new FileStream("creds/service-account-creds.json", FileMode.Open, FileAccess.Read)) {
-                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-            }
+            GoogleCredential credential = GetGoogleCreds();
+            var fileList = await GetFileList(credential);
 
-            Docs(credential);
+            string articlesDirId = "1VK3BqjbfhOlbyTPoLtw_ZzgXfotz-qV0";
+            var publishedArticlesList = fileList
+                .Where(f => f.Parents is not null && f.Parents.Contains(articlesDirId) &&
+                            f.Name.Contains("Company Structure"))
+                .Take(1)
+                .ToList();
+
+            // foreach published article,
+            //   extract meta
+            //   download images
+            //   generate html
+
+            foreach (File articleMeta in publishedArticlesList) {
+                var doc = GetDoc(credential, articleMeta.Id);
+                var contentList = doc.Body.Content;
+
+                // extract metadata
+                var metaDataSeparator = contentList
+                    .TakeWhile(ele => !GetTextInElement(ele).Contains("==="))
+                    .ToList();
+                var metaDataString = GetTextInElementList(metaDataSeparator);
+                ArticleMetaData metaData = JsonConvert.DeserializeObject<ArticleMetaData>(metaDataString);
+
+
+                Console.WriteLine(metaDataString);
+            }
         }
 
-        private static void Docs(GoogleCredential credential)
+        private static string GetTextInElement(StructuralElement ele)
+        {
+            if (ele.Paragraph is null) return "";
+            var strWriter = new StringBuilder();
+            foreach (var paraEle in ele.Paragraph.Elements) {
+                if (paraEle.TextRun is not null) {
+                    strWriter.Append(paraEle.TextRun.Content);
+                }
+                else {
+                    Console.WriteLine("element.TextRun is null");
+                    Console.WriteLine(JsonConvert.SerializeObject(paraEle));
+                }
+            }
+            return strWriter.Replace("“", "\"").Replace("”", "\"").ToString();
+        }
+
+        private static string GetTextInElementList(IEnumerable<StructuralElement> eleList)
+        {
+            var strWriter = new StringBuilder();
+            foreach (var content in eleList) {
+                if (content.Paragraph is null) continue;
+                foreach (var element in content.Paragraph.Elements) {
+                    try {
+                        if (element.TextRun is not null) {
+                            strWriter.Append(element.TextRun.Content);
+                        }
+                        else {
+                            Console.WriteLine("element.TextRun is null");
+                            Console.WriteLine(JsonConvert.SerializeObject(element));
+                        }
+                    }
+                    catch (Exception e) {
+                        Console.WriteLine(e);
+                        throw;
+                    }
+                }
+            }
+
+            return strWriter.Replace("“", "\"").Replace("”", "\"").ToString();
+        }
+
+        private static GoogleCredential GetGoogleCreds()
+        {
+            using var stream = new FileStream("creds/service-account-creds.json", FileMode.Open, FileAccess.Read);
+            return GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+        }
+
+        private static Document GetDoc(GoogleCredential credential, string docsId)
         {
             var service = new DocsService(new BaseClientService.Initializer {
                 HttpClientInitializer = credential,
                 ApplicationName = ApplicationName
             });
-
-            // Define request parameters.
-            String documentId = "1jFz2btSYzy6OmUXSm8qQihwkdTev_02habrZKqsnLZ8";
-            DocumentsResource.GetRequest request = service.Documents.Get(documentId);
-            //
-            // // Prints the title of the requested doc:
-            // // https://docs.google.com/document/d/195j9eDD3ccgjQRttHhJPymLJUCOUjs-jmwTrekvdjFE/edit
-            Document doc = request.Execute();
-            Console.WriteLine("The title of the doc is: {0}", doc.Title);
-            Console.WriteLine("la");
+            return service.Documents.Get(docsId).Execute();
         }
 
-        private static async Task Drive(GoogleCredential credential)
+        private static async Task<IList<File>> GetFileList(GoogleCredential credential)
         {
             // Create Google Docs API service.
             var driveService = new DriveService(new BaseClientService.Initializer {
@@ -57,39 +139,21 @@ namespace static_blog_generator
             });
 
             var listRequest = driveService.Files.List();
-            listRequest.PageSize = 10;
-            listRequest.Fields = "nextPageToken, files(id, name)";
-
-            // List files.
-            IList<Google.Apis.Drive.v3.Data.File> files = (await listRequest.ExecuteAsync()).Files;
-
-            if (files != null && files.Count > 0) {
-                foreach (var file in files) {
-                    Console.WriteLine("{0} ({1})", file.Name, file.Id);
-                }
-            }
-            else {
-                Console.WriteLine("No files found.");
-            }
+            listRequest.PageSize = 100;
+            listRequest.Fields = "nextPageToken, files(*)";
+            return (await listRequest.ExecuteAsync()).Files;
         }
+    }
 
-        private static async Task Discover()
-        {
-            var discoverService = new DiscoveryService(new BaseClientService.Initializer {
-                ApplicationName = "static-blog-generator",
-                ApiKey = "AIzaSyA54gitmtL-MfW5NwOv-9kNr6AkH0HVHGs",
-            });
+    internal record ArticleMetaData
+    {
+        public string Title { get; set; }
+        public ArticleState State { get; set; }
+        public DateTime Date { get; set; }
+    }
 
-            // Run the request.
-            Console.WriteLine("Executing a list request...");
-            var result = await discoverService.Apis.List().ExecuteAsync();
-
-            // Display the results.
-            if (result.Items != null) {
-                foreach (DirectoryList.ItemsData api in result.Items) {
-                    Console.WriteLine(api.Id + " - " + api.Title);
-                }
-            }
-        }
+    internal enum ArticleState
+    {
+        Draft, Published
     }
 }
