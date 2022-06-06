@@ -67,7 +67,7 @@ namespace static_blog_generator
                     .TakeWhile(ele => !GetTextInElement(ele).Contains("==="))
                     .ToList();
                 var metaDataString = GetTextInElementList(metaDataSeparator);
-                ArticleMetaData metaData = JsonConvert.DeserializeObject<ArticleMetaData>(metaDataString);
+                var metaData = JsonConvert.DeserializeObject<ArticleMetaData>(metaDataString);
 
 
                 Console.WriteLine(metaDataString);
@@ -149,6 +149,7 @@ namespace static_blog_generator
     {
         public string Title { get; set; }
         public ArticleState State { get; set; }
+        public ArticleCategory Category { get; set; }
         public DateTime Date { get; set; }
     }
 
@@ -156,4 +157,10 @@ namespace static_blog_generator
     {
         Draft, Published
     }
+    
+    internal enum ArticleCategory
+    {
+        Finance, Tech
+    }
+
 }
