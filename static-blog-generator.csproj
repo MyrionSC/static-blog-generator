@@ -20,7 +20,9 @@
     <None Update="creds\service-account-creds.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Remove="la.json" />
+    <None Update="static">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
