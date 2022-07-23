@@ -23,7 +23,7 @@ body {
 }
 
 .max-width {
-    max-width: 48rem;
+    max-width: 60rem;
 }
 
 .px3 {
@@ -71,6 +71,7 @@ h1, .h1 {
     display: block;
     margin-top: 3rem;
     margin-bottom: 1rem;
+    margin-left: 1rem;
     color: #2bbc8a;
     letter-spacing: .01em;
     font-weight: 700;
@@ -104,4 +105,33 @@ h1, .h1 {
     background-position: bottom;
     background-size: 100% 6px;
     background-repeat: repeat-x;
+}
+
+.d-flex {
+    display: flex;
+}
+
+
+@media (max-width: 480px) { /*less than 480px*/
+    .d-xs-flex {
+        display: flex !important;
+    }
+}
+@media (min-width: 480px) {/*more than 480px*/
+    .d-me-flex {
+        display: flex !important;
+    }
+}
+
+
+.flex-gap-1rem {
+    gap: 1rem
+}
+
+.text-nowrap {
+    white-space: nowrap
+}
+
+.mr05rem {
+    margin-right: 0.5rem;
 }
