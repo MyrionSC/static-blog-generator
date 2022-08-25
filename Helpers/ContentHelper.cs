@@ -36,9 +36,10 @@ public static class ContentHelper
                 <body class="max-width mx-auto px3 ltr">
                 <div class="content index py4">
                     <section id="about">
-                        Velkommen til. This is my blog. There are many like it, but this one is mine. I write about my 
+                        Halløjsovs, velkommen til! This is my blog. I write about my 
                         experience running a one-man software consulting business in Denmark, as a born and raised 
-                        native dane, as well as whatever technical subject that catches my fancy.
+                        native dane, as well as whatever technical subject I can think of. This blog is generated from
+                        google docs. <a href="https://github.com/MyrionSC/static-blog-generator">Source is here.</a>
                     </section>
                     <section class="d-me-flex flex-gap-1rem">
                         <div style="flex: 1">
