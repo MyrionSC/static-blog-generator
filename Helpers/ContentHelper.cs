@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Google.Apis.Docs.v1.Data;
 
 namespace static_blog_generator;
 
@@ -23,7 +25,7 @@ public static class ContentHelper
             </li>
             """
         ).StringJoin("\n");
-        return $$"""""
+        return $$"""
                 <!DOCTYPE html>
                 <html lang="en">
                 <head>
@@ -58,6 +60,65 @@ public static class ContentHelper
                 </div>
                 </body>
                 </html>
-               """"";
+                """;
+    }
+
+    public static string CreateArticleHtmlContent(IEnumerable<StructuralElement> documentContentList)
+    {
+        return $$"""
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Title</title>
+                    <meta name="viewport" content="width=device-width,initial-scale=1">
+                    <link rel=preload href="../../static/JetBrainsMono-Regular.woff2" as=font type=font/woff2>
+                    <link rel="stylesheet" href="../../static/style.css">
+                </head>
+                <body class="max-width mx-auto px3 ltr">
+                <div class="content index py4">
+                  {{documentContentList.Select(ParseStructuralElementToHtml).StringJoin("")}}
+                </div>
+                </body>
+                </html>
+                """;
+    }
+
+    private static string ParseStructuralElementToHtml(StructuralElement element)
+    {
+        if (element.Paragraph.ParagraphStyle.NamedStyleType == "HEADING_2") {
+            return $"<h1>{element.Paragraph.Elements.First().TextRun.Content}</h1>";
+        }
+        
+        if (element.Paragraph.ParagraphStyle.NamedStyleType == "NORMAL_TEXT") {
+            if (IsLineBreak(element.Paragraph.Elements)) return """<div class="separator"></div>""";
+            
+            if (element.Paragraph.Elements.Any(paragraphElement => paragraphElement.TextRun is null))
+                Console.WriteLine("textrun is null");
+            var parsedNormalText = element.Paragraph.Elements
+                .Where(paragraphElement => paragraphElement.TextRun is not null)
+                .Select(p => ParseNormalText(p)).ToArray();
+            return $"<p>{parsedNormalText.StringJoin("")}</p>";
+        }
+
+        return element.Paragraph.ParagraphStyle.NamedStyleType + "_" + 
+               element.Paragraph.Elements.Select(p => p.TextRun.Content).StringJoin("__");
+    }
+
+    private static bool IsLineBreak(IList<ParagraphElement> paragraphElements)
+    {
+        var pureText = paragraphElements
+                .Where(paragraphElement => paragraphElement.TextRun is not null)
+                .Select(p => ParseNormalText(p))
+                .StringJoin("");
+        return String.IsNullOrWhiteSpace(pureText);
+    }
+
+    private static string ParseNormalText(ParagraphElement p)
+    {
+        if (p?.TextRun.TextStyle.Link is not null) {
+            return $"""<a href="{p.TextRun.TextStyle.Link.Url}">{p.TextRun.Content}</a>""" ;
+        }
+        return p.TextRun.Content;
     }
 }

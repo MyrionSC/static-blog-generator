@@ -18,7 +18,6 @@ public static class DriveHelper
 {
     private const string APPLICATION_NAME = "static-blog-generator";
     private static readonly string[] SCOPES = { DocsService.Scope.DocumentsReadonly, DriveService.Scope.Drive };
-    private const string HTML_SEPARATOR = "\n<br/>\n";
 
     public static async Task<IList<DriveFile>> GetFileList(GoogleCredential credential)
     {
@@ -61,27 +60,15 @@ public static class DriveHelper
         var metaData = JsonConvert.DeserializeObject<ArticleMetaData>(metaDataString)!;
         metaData.UrlPath = $"articles/{metaData.Title.Replace(" ", "-").ToLower()}";
 
-        // parse body to html
-        var articleBodyHtml = contentList
+        var actualDocumentList = contentList
             .SkipWhile(ele => !GetTextInElement(ele).Contains("==="))
-            .Skip(1) // remove "==="
-            .Select(ParseElementToHtml)
-            .StringJoin(HTML_SEPARATOR);
+            .Skip(1); // remove "==="
 
         return new ParsedFile {
             MetaData = metaData,
-            HtmlContent = articleBodyHtml
+            HtmlContent = ContentHelper.CreateArticleHtmlContent(actualDocumentList)
         };
     }
-
-    private static string ParseElementToHtml(StructuralElement element)
-    {
-        return element.Paragraph.Elements
-            .Where(paragraphElement => paragraphElement.TextRun?.Content != null)
-            .Select(paragraphElement => paragraphElement.TextRun.Content)
-            .StringJoin(HTML_SEPARATOR);
-    }
-
 
     private static string GetTextInElement(StructuralElement ele)
     {
