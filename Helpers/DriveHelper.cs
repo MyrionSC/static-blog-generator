@@ -47,7 +47,8 @@ public static class DriveHelper
             .ToList();
     }
 
-    public static ParsedFile ParseFile(DriveFile file, GoogleCredential credential)
+    public static ParsedFile ParseFile(DriveFile file, GoogleCredential credential,
+        List<ImageMetadata> imageMetadataList)
     {
         var doc = GetDoc(credential, file.Id);
         var contentList = doc.Body.Content;
@@ -60,13 +61,14 @@ public static class DriveHelper
         var metaData = JsonConvert.DeserializeObject<ArticleMetaData>(metaDataString)!;
         metaData.UrlPath = $"articles/{metaData.Title.Replace(" ", "-").ToLower()}";
 
+        // find and parse article content
         var actualDocumentList = contentList
             .SkipWhile(ele => !GetTextInElement(ele).Contains("==="))
             .Skip(1); // remove "==="
 
         return new ParsedFile {
             MetaData = metaData,
-            HtmlContent = ContentHelper.CreateArticleHtmlContent(actualDocumentList)
+            HtmlContent = ContentHelper.CreateArticleHtmlContent(actualDocumentList, imageMetadataList)
         };
     }
 
@@ -112,7 +114,7 @@ public static class DriveHelper
         return strWriter.Replace("“", "\"").Replace("”", "\"").ToString();
     }
 
-    private static Document GetDoc(GoogleCredential credential, string docsId)
+    public static Document GetDoc(GoogleCredential credential, string docsId)
     {
         var service = new DocsService(new BaseClientService.Initializer {
             HttpClientInitializer = credential,

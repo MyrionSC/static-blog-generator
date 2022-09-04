@@ -147,3 +147,10 @@ h1, .h1 {
 .separator {
     height: 0.25rem;
 }
+
+.m-auto {
+    margin: auto;
+}
+
+.mt-2 {margin-top: 0.5rem}
+.mb-2 {margin-bottom: 0.5rem}

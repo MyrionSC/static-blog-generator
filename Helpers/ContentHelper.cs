@@ -10,22 +10,22 @@ public static class ContentHelper
     public static string CreateFrontPageHtmlContent(List<ParsedFile> parsedBusinessFileList, List<ParsedFile> parsedTechFileList)
     {
         var businessListItems = parsedBusinessFileList.Select(f => 
-            $$"""
+            $"""
             <li class="post-item">
-                <div class="text-nowrap mr05rem">{{f.MetaData.Date:yyyy-MM-dd}}</div>
-                <span><a href="{{f.MetaData.UrlPath}}">{{f.MetaData.Title}}</a></span>
+                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd}</div>
+                <span><a href="{f.MetaData.UrlPath}">{f.MetaData.Title}</a></span>
             </li>
             """
         ).StringJoin("\n");
         var techListItems = parsedTechFileList.Select(f => 
-            $$"""
+            $"""
             <li class="post-item">
-                <div class="text-nowrap mr05rem">{{f.MetaData.Date:yyyy-MM-dd}}</div>
-                <span><a href="{{f.MetaData.UrlPath}}">{{f.MetaData.Title}}</a></span>
+                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd}</div>
+                <span><a href="{f.MetaData.UrlPath}">{f.MetaData.Title}</a></span>
             </li>
             """
         ).StringJoin("\n");
-        return $$"""
+        return $"""
                 <!DOCTYPE html>
                 <html lang="en">
                 <head>
@@ -47,13 +47,13 @@ public static class ContentHelper
                         <div style="flex: 1">
                             <span class="h1">Business</span>
                             <ul class="post-list">
-                                {{businessListItems}}
+                                {businessListItems}
                             </ul>
                         </div>
                         <div style="flex: 1">
                             <span class="h1">Technical</span>
                             <ul class="post-list">
-                                {{techListItems}}
+                                {techListItems}
                             </ul>
                         </div>
                     </section>
@@ -63,7 +63,8 @@ public static class ContentHelper
                 """;
     }
 
-    public static string CreateArticleHtmlContent(IEnumerable<StructuralElement> documentContentList)
+    public static string CreateArticleHtmlContent(IEnumerable<StructuralElement> documentContentList,
+        List<ImageMetadata> imageMetadataList)
     {
         return $$"""
                 <!DOCTYPE html>
@@ -77,24 +78,35 @@ public static class ContentHelper
                 </head>
                 <body class="max-width mx-auto px3 ltr">
                 <div class="content index py4">
-                  {{documentContentList.Select(ParseStructuralElementToHtml).StringJoin("")}}
+                  {{documentContentList.Select(element => ParseStructuralElementToHtml(element, imageMetadataList)).StringJoin("")}}
                 </div>
                 </body>
                 </html>
                 """;
     }
 
-    private static string ParseStructuralElementToHtml(StructuralElement element)
+    private static string ParseStructuralElementToHtml(StructuralElement element, List<ImageMetadata> imageMetadataList)
     {
         if (element.Paragraph.ParagraphStyle.NamedStyleType == "HEADING_2") {
             return $"<h1>{element.Paragraph.Elements.First().TextRun.Content}</h1>";
         }
         
+        // IMAGE
+        if (element.Paragraph.Elements.Any(e => e.InlineObjectElement is not null)) {
+            var imageEle = element.Paragraph.Elements.First(e => e.InlineObjectElement is not null);
+            var imageMetadata = imageMetadataList.First(i => i.Id == imageEle.InlineObjectElement.InlineObjectId);
+            string imageName = imageEle.InlineObjectElement.InlineObjectId.Replace(".", "_");
+            // TODO: mobile friendly
+            return $"""
+                    <div class="m-auto mt-2 mb-2">
+                      <img style="height: {imageMetadata.HeighPx.ToString().Replace(",",".")}px; width: {imageMetadata.WidthPx.ToString().Replace(",",".")}px" src="../../images/{imageName}.png"/>
+                    </div>
+                    """ ;
+        }
+        
         if (element.Paragraph.ParagraphStyle.NamedStyleType == "NORMAL_TEXT") {
             if (IsLineBreak(element.Paragraph.Elements)) return """<div class="separator"></div>""";
-            
-            if (element.Paragraph.Elements.Any(paragraphElement => paragraphElement.TextRun is null))
-                Console.WriteLine("textrun is null");
+
             var parsedNormalText = element.Paragraph.Elements
                 .Where(paragraphElement => paragraphElement.TextRun is not null)
                 .Select(p => ParseNormalText(p)).ToArray();
@@ -109,7 +121,7 @@ public static class ContentHelper
     {
         var pureText = paragraphElements
                 .Where(paragraphElement => paragraphElement.TextRun is not null)
-                .Select(p => ParseNormalText(p))
+                .Select(p => p.TextRun.Content)
                 .StringJoin("");
         return String.IsNullOrWhiteSpace(pureText);
     }
