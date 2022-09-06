@@ -7,7 +7,7 @@ echo running...
 ./static-blog-generator.exe
 
 echo uploading...
-scp -r index.html articles/ static/ marand:/var/www/blog.marand
+scp -r index.html articles/ static/ images/ marand:/var/www/blog.marand
 
 cd ../../..
 

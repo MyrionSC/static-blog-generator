@@ -38,10 +38,11 @@ public static class ContentHelper
                 <body class="max-width mx-auto px3 ltr">
                 <div class="content index py4">
                     <section id="about">
-                        Halløjsovs, velkommen til! This is my blog. I write about my 
-                        experience running a one-man software consulting business in Denmark, as a born and raised 
-                        native dane, as well as whatever technical subject I can think of. This blog is generated from
-                        google docs. <a href="https://github.com/MyrionSC/static-blog-generator">Source is here.</a>
+                        Halløjsovs, velkommen til! I am Martin, This is my blog. I write about my experience running a 
+                        one-man software consulting business in Denmark, as well as various technical stuff. 
+                        I am a born and raised native dane, currently residing in Aalborg, Paris of the North, where we
+                        are supposedly on average very happy. This blog is statically generated from google docs.
+                        <a href="https://github.com/MyrionSC/static-blog-generator">Source is here.</a>
                     </section>
                     <section class="d-me-flex flex-gap-1rem">
                         <div style="flex: 1">
