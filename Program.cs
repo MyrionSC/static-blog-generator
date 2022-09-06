@@ -21,23 +21,27 @@ internal static class Program
 
     private static async Task Main()
     {
+        Console.WriteLine("Gettings files... ");
         GoogleCredential credential = DriveHelper.GetGoogleCreds();
         var fileList = await DriveHelper.GetFileList(credential);
 
+        Console.WriteLine("Saving images...");
         var imageMetadataList = await SaveArticleImages(fileList, credential);
 
+        Console.WriteLine("Generating html...");
         var businessFileList = DriveHelper.GetDirFilesByParentId(fileList, BUSINESS_DIR_ID);
         var parsedBusinessFileList =
             businessFileList.Select(f => DriveHelper.ParseFile(f, credential, imageMetadataList)).ToList();
-        parsedBusinessFileList.Sort((a, b) => a.MetaData.Date < b.MetaData.Date ? 1 : -1);
+        parsedBusinessFileList.Sort((a, b) => a.MetaData.Date < b.MetaData.Date ? -1 : 1);
 
         var techFileList = DriveHelper.GetDirFilesByParentId(fileList, TECH_DIR_ID);
         var parsedTechFileList = techFileList.Select(f => DriveHelper.ParseFile(f, credential, imageMetadataList)).ToList();
-        parsedTechFileList.Sort((a, b) => a.MetaData.Date < b.MetaData.Date ? 1 : -1);
+        parsedTechFileList.Sort((a, b) => a.MetaData.Date < b.MetaData.Date ? -1 : 1);
 
         string frontpageHtmlContent =
             ContentHelper.CreateFrontPageHtmlContent(parsedBusinessFileList, parsedTechFileList);
 
+        Console.WriteLine("Writing to files...");
         await File.WriteAllTextAsync("index.html", frontpageHtmlContent);
         foreach (ParsedFile parsedFile in parsedBusinessFileList) {
             Directory.CreateDirectory($"{parsedFile.MetaData.UrlPath}");
@@ -50,6 +54,7 @@ internal static class Program
             await File.WriteAllTextAsync($"{parsedFile.MetaData.UrlPath}/index.html",
                 parsedFile.HtmlContent);
         }
+        Console.WriteLine("Done");
     }
 
     private static async Task<List<ImageMetadata>> SaveArticleImages(IList<DriveFile> fileList, GoogleCredential credential)
