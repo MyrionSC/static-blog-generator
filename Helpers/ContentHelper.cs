@@ -1,27 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Google.Apis.Docs.v1.Data;
 
 namespace static_blog_generator;
 
 public static class ContentHelper
 {
-    public static string CreateFrontPageHtmlContent(List<ParsedFile> parsedBusinessFileList, List<ParsedFile> parsedTechFileList)
+    public static string CreateFrontPageHtmlContent(List<ParsedFile> parsedBusinessFileList,
+        List<ParsedFile> parsedTechFileList)
     {
-        var businessListItems = parsedBusinessFileList.Select(f => 
+        var businessListItems = parsedBusinessFileList.Select(f =>
             $"""
             <li class="post-item">
-                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd}</div>
-                <span><a href="{f.MetaData.UrlPath}">{f.MetaData.Title}</a></span>
+                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd} </div>
+                <span><a href="{ f.MetaData.UrlPath} ">{ f.MetaData.Title} </a></span>
             </li>
             """
         ).StringJoin("\n");
-        var techListItems = parsedTechFileList.Select(f => 
+        var techListItems = parsedTechFileList.Select(f =>
             $"""
             <li class="post-item">
-                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd}</div>
-                <span><a href="{f.MetaData.UrlPath}">{f.MetaData.Title}</a></span>
+                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd} </div>
+                <span><a href="{ f.MetaData.UrlPath} ">{ f.MetaData.Title} </a></span>
             </li>
             """
         ).StringJoin("\n");
@@ -48,25 +50,29 @@ public static class ContentHelper
                         <div style="flex: 1">
                             <span class="h1">Business</span>
                             <ul class="post-list">
-                                {businessListItems}
+                                { businessListItems} 
                             </ul>
                         </div>
                         <div style="flex: 1">
                             <span class="h1">Technical</span>
                             <ul class="post-list">
-                                {techListItems}
+                                { techListItems} 
                             </ul>
                         </div>
                     </section>
                 </div>
                 </body>
                 </html>
-                """;
+                """ ;
     }
 
     public static string CreateArticleHtmlContent(IEnumerable<StructuralElement> documentContentList,
         List<ImageMetadata> imageMetadataList)
     {
+        var stringBuilder = new StringBuilder();
+        using var documentIter = documentContentList.GetEnumerator();
+        BuildHtmlFromDocumentEnumerator(stringBuilder, documentIter, imageMetadataList);
+
         return $$"""
                 <!DOCTYPE html>
                 <html lang="en">
@@ -79,59 +85,74 @@ public static class ContentHelper
                 </head>
                 <body class="max-width mx-auto px3 ltr">
                 <div class="content index py4">
-                  {{documentContentList.Select(element => ParseStructuralElementToHtml(element, imageMetadataList)).StringJoin("")}}
+                  {{ stringBuilder}} 
                 </div>
                 </body>
                 </html>
-                """;
+                """ ;
     }
 
-    private static string ParseStructuralElementToHtml(StructuralElement element, List<ImageMetadata> imageMetadataList)
+    private static void BuildHtmlFromDocumentEnumerator(StringBuilder stringBuilder,
+        IEnumerator<StructuralElement> documentIter,
+        List<ImageMetadata> imageMetadataList)
     {
-        if (element.Paragraph.ParagraphStyle.NamedStyleType == "HEADING_2") {
-            return $"<h1>{element.Paragraph.Elements.First().TextRun.Content}</h1>";
+        if (!documentIter.MoveNext()) return;
+        var ele = documentIter.Current!;
+
+        // HEADER
+        if (ele.Paragraph.ParagraphStyle.NamedStyleType == "HEADING_2") {
+            stringBuilder.Append($"<h1>{ele.Paragraph.Elements.First().TextRun.Content}</h1>");
         }
         
+        // LIST
+        if (ele.Paragraph.Bullet is not null) {
+            Console.WriteLine("Bullet!");
+        }
+
         // IMAGE
-        if (element.Paragraph.Elements.Any(e => e.InlineObjectElement is not null)) {
-            var imageEle = element.Paragraph.Elements.First(e => e.InlineObjectElement is not null);
+        if (ele.Paragraph.Elements.Any(e => e.InlineObjectElement is not null)) {
+            var imageEle = ele.Paragraph.Elements.First(e => e.InlineObjectElement is not null);
             var imageMetadata = imageMetadataList.First(i => i.Id == imageEle.InlineObjectElement.InlineObjectId);
             string imageName = imageEle.InlineObjectElement.InlineObjectId.Replace(".", "_");
             // TODO: mobile friendly
-            return $"""
+            stringBuilder.Append($"""
                     <div class="m-auto mt-2 mb-2">
-                      <img style="height: {imageMetadata.HeighPx.ToString().Replace(",",".")}px; width: {imageMetadata.WidthPx.ToString().Replace(",",".")}px" src="../../images/{imageName}.png"/>
+                      <img style="height: {imageMetadata.HeighPx.ToString().Replace(",", ".")}px; width:{imageMetadata.WidthPx.ToString().Replace(",", ".")}px"
+                       src="../../images/{imageName}.png"/>
                     </div>
-                    """ ;
+                    """ );
+        }
+
+        // NORMAL
+        else if (ele.Paragraph.ParagraphStyle.NamedStyleType == "NORMAL_TEXT") {
+            if (IsLineBreak(ele.Paragraph.Elements)) {
+                stringBuilder.Append("""<div class="separator"></div>""");
+            }
+            else {
+                var parsedNormalText = ele.Paragraph.Elements
+                    .Where(paragraphElement => paragraphElement.TextRun is not null)
+                    .Select(p => ParseNormalText(p)).ToArray();
+                stringBuilder.Append($"<p>{parsedNormalText.StringJoin("")}</p>");
+            }
         }
         
-        if (element.Paragraph.ParagraphStyle.NamedStyleType == "NORMAL_TEXT") {
-            if (IsLineBreak(element.Paragraph.Elements)) return """<div class="separator"></div>""";
-
-            var parsedNormalText = element.Paragraph.Elements
-                .Where(paragraphElement => paragraphElement.TextRun is not null)
-                .Select(p => ParseNormalText(p)).ToArray();
-            return $"<p>{parsedNormalText.StringJoin("")}</p>";
-        }
-
-        return element.Paragraph.ParagraphStyle.NamedStyleType + "_" + 
-               element.Paragraph.Elements.Select(p => p.TextRun.Content).StringJoin("__");
+        BuildHtmlFromDocumentEnumerator(stringBuilder, documentIter, imageMetadataList);
     }
 
     private static bool IsLineBreak(IList<ParagraphElement> paragraphElements)
     {
         var pureText = paragraphElements
-                .Where(paragraphElement => paragraphElement.TextRun is not null)
-                .Select(p => p.TextRun.Content)
-                .StringJoin("");
+            .Where(paragraphElement => paragraphElement.TextRun is not null)
+            .Select(p => p.TextRun.Content)
+            .StringJoin("");
         return String.IsNullOrWhiteSpace(pureText);
     }
 
     private static string ParseNormalText(ParagraphElement p)
     {
         if (p?.TextRun.TextStyle.Link is not null) {
-            return $"""<a href="{p.TextRun.TextStyle.Link.Url}">{p.TextRun.Content}</a>""" ;
+            return $"""<a href="{ p.TextRun.TextStyle.Link.Url} ">{ p.TextRun.Content} </a>""" ;
         }
-        return p.TextRun.Content;
+        return p!.TextRun.Content;
     }
 }
