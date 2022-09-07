@@ -50,13 +50,13 @@ public static class ContentHelper
                         <div style="flex: 1">
                             <span class="h1">Business</span>
                             <ul class="post-list">
-                                { businessListItems} 
+                                {businessListItems} 
                             </ul>
                         </div>
                         <div style="flex: 1">
                             <span class="h1">Technical</span>
                             <ul class="post-list">
-                                { techListItems} 
+                                {techListItems}    
                             </ul>
                         </div>
                     </section>
@@ -85,7 +85,7 @@ public static class ContentHelper
                 </head>
                 <body class="max-width mx-auto px3 ltr">
                 <div class="content index py4">
-                  {{ stringBuilder}} 
+                  {{stringBuilder}}    
                 </div>
                 </body>
                 </html>
@@ -97,20 +97,31 @@ public static class ContentHelper
         List<ImageMetadata> imageMetadataList)
     {
         if (!documentIter.MoveNext()) return;
+        begin:
         var ele = documentIter.Current!;
 
         // HEADER
         if (ele.Paragraph.ParagraphStyle.NamedStyleType == "HEADING_2") {
             stringBuilder.Append($"<h1>{ele.Paragraph.Elements.First().TextRun.Content}</h1>");
         }
-        
+
         // LIST
-        if (ele.Paragraph.Bullet is not null) {
-            Console.WriteLine("Bullet!");
+        else if (ele.Paragraph.Bullet is not null) {
+            var listId = ele.Paragraph.Bullet.ListId;
+            stringBuilder.Append("<ul>");
+            do {
+                stringBuilder.Append($"<li>{ParseNormalText(ele)}</li>");
+                documentIter.MoveNext();
+                ele = documentIter.Current!;
+                if (ele.Paragraph.Bullet is null || listId != ele.Paragraph.Bullet.ListId) {
+                    stringBuilder.Append("</ul>");
+                    goto begin; // back to spaghetti basics!
+                }
+            } while (true);
         }
 
         // IMAGE
-        if (ele.Paragraph.Elements.Any(e => e.InlineObjectElement is not null)) {
+        else if (ele.Paragraph.Elements.Any(e => e.InlineObjectElement is not null)) {
             var imageEle = ele.Paragraph.Elements.First(e => e.InlineObjectElement is not null);
             var imageMetadata = imageMetadataList.First(i => i.Id == imageEle.InlineObjectElement.InlineObjectId);
             string imageName = imageEle.InlineObjectElement.InlineObjectId.Replace(".", "_");
@@ -129,13 +140,10 @@ public static class ContentHelper
                 stringBuilder.Append("""<div class="separator"></div>""");
             }
             else {
-                var parsedNormalText = ele.Paragraph.Elements
-                    .Where(paragraphElement => paragraphElement.TextRun is not null)
-                    .Select(p => ParseNormalText(p)).ToArray();
-                stringBuilder.Append($"<p>{parsedNormalText.StringJoin("")}</p>");
+                stringBuilder.Append($"<p>{ParseNormalText(ele)}</p>");
             }
         }
-        
+
         BuildHtmlFromDocumentEnumerator(stringBuilder, documentIter, imageMetadataList);
     }
 
@@ -147,11 +155,18 @@ public static class ContentHelper
             .StringJoin("");
         return String.IsNullOrWhiteSpace(pureText);
     }
+    
+    private static string ParseNormalText(StructuralElement ele)
+    {
+        return ele.Paragraph.Elements
+            .Where(paragraphElement => paragraphElement.TextRun is not null)
+            .Select(ParseNormalTextElement).StringJoin("");
+    }
 
-    private static string ParseNormalText(ParagraphElement p)
+    private static string ParseNormalTextElement(ParagraphElement p)
     {
         if (p?.TextRun.TextStyle.Link is not null) {
-            return $"""<a href="{ p.TextRun.TextStyle.Link.Url} ">{ p.TextRun.Content} </a>""" ;
+            return $"""<a href="{p.TextRun.TextStyle.Link.Url }">{p.TextRun.Content}</a>""" ;
         }
         return p!.TextRun.Content;
     }

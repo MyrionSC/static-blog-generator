@@ -131,6 +131,9 @@ h1, .h1 {
     }
 }
 
+li {
+    margin: 5px 0;
+}
 
 .flex-gap-1rem {
     gap: 1rem
