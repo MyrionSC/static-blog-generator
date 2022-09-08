@@ -41,18 +41,6 @@ p {
     padding-bottom: 4rem;
 }
 
-@media (max-width: 480px) {
-    .px3 {
-        padding-right: 1rem;
-        padding-left: 1rem;
-    }
-
-    .my4 {
-        margin-top: 2rem;
-        margin-bottom: 2rem;
-    }
-}
-
 .mx-auto {
     margin-right: auto;
     margin-left: auto;
@@ -119,14 +107,25 @@ h1, .h1 {
 
 @media (max-width: 480px) {
     /*less than 480px*/
+    .pt-xs-0 {
+        padding-top: 0 !important;
+    }
     .d-xs-flex {
         display: flex !important;
+    }
+
+    .w-xs-100 {
+        width: 100% !important;
+    }
+
+    .h-xs-initial {
+        height: initial !important;
     }
 }
 
 @media (min-width: 480px) {
     /*more than 480px*/
-    .d-me-flex {
+    .d-md-flex {
         display: flex !important;
     }
 }
@@ -155,5 +154,10 @@ li {
     margin: auto;
 }
 
-.mt-2 {margin-top: 0.5rem}
-.mb-2 {margin-bottom: 0.5rem}
+.mt-2 {
+    margin-top: 0.5rem
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem
+}

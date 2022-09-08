@@ -38,7 +38,7 @@ public static class ContentHelper
                     <link rel="stylesheet" href="static/style.css">
                 </head>
                 <body class="max-width mx-auto px3 ltr">
-                <div class="content index py4">
+                <div class="content index py4 pt-xs-0">
                     <section id="about">
                         Halløjsovs, velkommen til! I am Martin, This is my blog. I write about my experience running a 
                         one-man software consulting business in Denmark, as well as various technical stuff. 
@@ -46,7 +46,7 @@ public static class ContentHelper
                         are supposedly on average very happy. This blog is statically generated from google docs.
                         <a href="https://github.com/MyrionSC/static-blog-generator">Source is here.</a>
                     </section>
-                    <section class="d-me-flex flex-gap-1rem">
+                    <section class="d-md-flex flex-gap-1rem">
                         <div style="flex: 1">
                             <span class="h1">Business</span>
                             <ul class="post-list">
@@ -84,7 +84,7 @@ public static class ContentHelper
                     <link rel="stylesheet" href="../../static/style.css">
                 </head>
                 <body class="max-width mx-auto px3 ltr">
-                <div class="content index py4">
+                <div class="content index py4 pt-xs-0">
                   {{stringBuilder}}    
                 </div>
                 </body>
@@ -125,10 +125,9 @@ public static class ContentHelper
             var imageEle = ele.Paragraph.Elements.First(e => e.InlineObjectElement is not null);
             var imageMetadata = imageMetadataList.First(i => i.Id == imageEle.InlineObjectElement.InlineObjectId);
             string imageName = imageEle.InlineObjectElement.InlineObjectId.Replace(".", "_");
-            // TODO: mobile friendly
             stringBuilder.Append($"""
                     <div class="m-auto mt-2 mb-2">
-                      <img style="height: {imageMetadata.HeighPx.ToString().Replace(",", ".")}px; width:{imageMetadata.WidthPx.ToString().Replace(",", ".")}px"
+                      <img class="w-xs-100 h-xs-initial" style="height: {imageMetadata.HeighPx.ToString().Replace(",", ".")}px; width:{imageMetadata.WidthPx.ToString().Replace(",", ".")}px"
                        src="../../images/{imageName}.png"/>
                     </div>
                     """ );
