@@ -43,6 +43,10 @@ internal static class Program
 
         Console.WriteLine("Writing to files...");
         await File.WriteAllTextAsync("index.html", frontpageHtmlContent);
+        
+        // TODO: next / prev buttons
+        
+        // TODO: Don't write if draft
         foreach (ParsedFile parsedFile in parsedBusinessFileList) {
             Directory.CreateDirectory($"{parsedFile.MetaData.UrlPath}");
             await File.WriteAllTextAsync($"{parsedFile.MetaData.UrlPath}/index.html",

@@ -42,8 +42,8 @@ public static class ContentHelper
                     <section id="about">
                         Halløjsovs, velkommen til! I am Martin, This is my blog. I write about my experience running a 
                         one-man software consulting business in Denmark, as well as various technical stuff. 
-                        I am a born and raised native dane, currently residing in Aalborg, Paris of the North, where we
-                        are supposedly on average very happy. This blog is statically generated from google docs.
+                        I am a born and raised native dane, currently residing in Aalborg, the Paris of the north!
+                        This blog is statically generated from google docs.
                         <a href="https://github.com/MyrionSC/static-blog-generator">Source is here.</a>
                     </section>
                     <section class="d-md-flex flex-gap-1rem">
