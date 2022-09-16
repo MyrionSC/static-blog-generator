@@ -32,7 +32,7 @@ public static class ContentHelper
                 <html lang="en">
                 <head>
                     <meta charset="UTF-8">
-                    <title>Title</title>
+                    <title>Marand's blog</title>
                     <meta name="viewport" content="width=device-width,initial-scale=1">
                     <link rel=preload href="static/JetBrainsMono-Regular.woff2" as=font type=font/woff2>
                     <link rel="stylesheet" href="static/style.css">
@@ -50,13 +50,13 @@ public static class ContentHelper
                         <div style="flex: 1">
                             <span class="h1">Business</span>
                             <ul class="post-list">
-                                {businessListItems} 
+                                {businessListItems}
                             </ul>
                         </div>
                         <div style="flex: 1">
                             <span class="h1">Technical</span>
                             <ul class="post-list">
-                                {techListItems}    
+                                {techListItems}
                             </ul>
                         </div>
                     </section>
@@ -66,7 +66,8 @@ public static class ContentHelper
                 """ ;
     }
 
-    public static string CreateArticleHtmlContent(IEnumerable<StructuralElement> documentContentList,
+    public static string CreateArticleHtmlContent(ArticleMetaData articleMetaData,
+        IEnumerable<StructuralElement> documentContentList,
         List<ImageMetadata> imageMetadataList)
     {
         var stringBuilder = new StringBuilder();
@@ -78,14 +79,14 @@ public static class ContentHelper
                 <html lang="en">
                 <head>
                     <meta charset="UTF-8">
-                    <title>Title</title>
+                    <title>{{articleMetaData.Title}}</title>
                     <meta name="viewport" content="width=device-width,initial-scale=1">
                     <link rel=preload href="../../static/JetBrainsMono-Regular.woff2" as=font type=font/woff2>
                     <link rel="stylesheet" href="../../static/style.css">
                 </head>
                 <body class="max-width mx-auto px3 ltr">
                 <div class="content index py4 pt-xs-0">
-                  {{stringBuilder}}    
+                  {{stringBuilder}}
                 </div>
                 </body>
                 </html>
@@ -154,7 +155,7 @@ public static class ContentHelper
             .StringJoin("");
         return String.IsNullOrWhiteSpace(pureText);
     }
-    
+
     private static string ParseNormalText(StructuralElement ele)
     {
         return ele.Paragraph.Elements

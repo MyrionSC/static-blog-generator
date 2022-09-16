@@ -68,7 +68,7 @@ public static class DriveHelper
 
         return new ParsedFile {
             MetaData = metaData,
-            HtmlContent = ContentHelper.CreateArticleHtmlContent(actualDocumentList, imageMetadataList)
+            HtmlContent = ContentHelper.CreateArticleHtmlContent(metaData, actualDocumentList, imageMetadataList)
         };
     }
 
