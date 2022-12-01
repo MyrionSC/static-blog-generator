@@ -38,7 +38,7 @@ public static class ContentHelper
                     <link rel="stylesheet" href="static/style.css">
                 </head>
                 <body class="max-width mx-auto px3 ltr">
-                <div class="content index py4 pt-xs-0">
+                <div class="content index py-4 pt-xs-2">
                     <section id="about">
                         Halløjsovs, velkommen til! I am Martin, This is my blog. I write about my experience running a 
                         one-man software consulting business in Denmark, as well as various technical stuff. 
@@ -85,7 +85,7 @@ public static class ContentHelper
                     <link rel="stylesheet" href="../../static/style.css">
                 </head>
                 <body class="max-width mx-auto px3 ltr">
-                <div class="content index py4 pt-xs-0">
+                <div class="content index py-4 pt-xs-2">
                   {{stringBuilder}}
                 </div>
                 </body>

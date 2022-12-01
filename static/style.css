@@ -36,7 +36,7 @@ p {
     padding-left: 1rem;
 }
 
-.py4 {
+.py-4 {
     padding-top: 4rem;
     padding-bottom: 4rem;
 }
@@ -107,8 +107,8 @@ h1, .h1 {
 
 @media (max-width: 480px) {
     /*less than 480px*/
-    .pt-xs-0 {
-        padding-top: 0 !important;
+    .pt-xs-2 {
+        padding-top: 2rem !important;
     }
     .d-xs-flex {
         display: flex !important;
