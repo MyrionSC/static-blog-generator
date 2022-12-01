@@ -11,19 +11,23 @@ public static class ContentHelper
     public static string CreateFrontPageHtmlContent(List<ParsedFile> parsedBusinessFileList,
         List<ParsedFile> parsedTechFileList)
     {
-        var businessListItems = parsedBusinessFileList.Select(f =>
+        var businessListItems = parsedBusinessFileList
+            .Where(f => f.MetaData.State == ArticleState.Published)
+            .Select(f =>
             $"""
             <li class="post-item">
-                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd} </div>
-                <span><a href="{ f.MetaData.UrlPath} ">{ f.MetaData.Title} </a></span>
+                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd}</div>
+                <span><a href="{f.MetaData.UrlPath}">{f.MetaData.Title} </a></span>
             </li>
             """
         ).StringJoin("\n");
-        var techListItems = parsedTechFileList.Select(f =>
+        var techListItems = parsedTechFileList
+            .Where(f => f.MetaData.State == ArticleState.Published)
+            .Select(f =>
             $"""
             <li class="post-item">
-                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd} </div>
-                <span><a href="{ f.MetaData.UrlPath} ">{ f.MetaData.Title} </a></span>
+                <div class="text-nowrap mr05rem">{f.MetaData.Date:yyyy-MM-dd}</div>
+                <span><a href="{f.MetaData.UrlPath}">{f.MetaData.Title}</a></span>
             </li>
             """
         ).StringJoin("\n");
