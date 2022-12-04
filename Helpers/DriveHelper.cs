@@ -54,10 +54,10 @@ public static class DriveHelper
         var contentList = doc.Body.Content;
 
         // extract metadata
-        var metaDataSeparator = contentList
+        var metaDataElementList = contentList
             .TakeWhile(ele => !GetTextInElement(ele).Contains("==="))
             .ToList();
-        var metaDataString = GetTextInElementList(metaDataSeparator);
+        var metaDataString = GetTextInElementList(metaDataElementList);
         var metaData = JsonConvert.DeserializeObject<ArticleMetaData>(metaDataString)!;
         metaData.UrlPath = $"articles/{metaData.Title.Replace(" ", "-").ToLower()}";
 

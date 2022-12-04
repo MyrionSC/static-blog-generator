@@ -118,6 +118,10 @@ public static class ContentHelper
                 stringBuilder.Append($"<li>{ParseNormalText(ele)}</li>");
                 documentIter.MoveNext();
                 ele = documentIter.Current!;
+                if (ele is null) { // if list is the last thing in the document
+                    stringBuilder.Append("</ul>");
+                    return;
+                }
                 if (ele.Paragraph.Bullet is null || listId != ele.Paragraph.Bullet.ListId) {
                     stringBuilder.Append("</ul>");
                     goto begin; // back to spaghetti basics!

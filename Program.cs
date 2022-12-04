@@ -47,14 +47,14 @@ internal static class Program
         // TODO: next / prev buttons
         
         foreach (ParsedFile parsedFile in parsedBusinessFileList) {
-            if (parsedFile.MetaData.State == ArticleState.Draft) return;
+            if (parsedFile.MetaData.State == ArticleState.Draft) continue;
             Directory.CreateDirectory($"{parsedFile.MetaData.UrlPath}");
             await File.WriteAllTextAsync($"{parsedFile.MetaData.UrlPath}/index.html",
                 parsedFile.HtmlContent);
         }
 
         foreach (ParsedFile parsedFile in parsedTechFileList) {
-            if (parsedFile.MetaData.State == ArticleState.Draft) return;
+            if (parsedFile.MetaData.State == ArticleState.Draft) continue;
             Directory.CreateDirectory($"{parsedFile.MetaData.UrlPath}");
             await File.WriteAllTextAsync($"{parsedFile.MetaData.UrlPath}/index.html",
                 parsedFile.HtmlContent);
