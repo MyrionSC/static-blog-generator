@@ -178,6 +178,9 @@ public static class ContentHelper
         if (p?.TextRun.TextStyle.Link is not null) {
             return $"""<a href="{p.TextRun.TextStyle.Link.Url }">{p.TextRun.Content}</a>""" ;
         }
+        if (p?.TextRun.TextStyle.Bold == true) {
+            return $"""<b>{p.TextRun.Content}</b>""" ;
+        }
         return p!.TextRun.Content;
     }
 }

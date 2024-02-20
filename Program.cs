@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Docs.v1.Data;
 using static_blog_generator.Helpers;
 using static_blog_generator.Models;
 using DriveFile = Google.Apis.Drive.v3.Data.File;
