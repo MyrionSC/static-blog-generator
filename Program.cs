@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Docs.v1.Data;
+using static_blog_generator.Helpers;
+using static_blog_generator.Models;
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 // ReSharper disable InconsistentNaming
@@ -21,6 +23,9 @@ internal static class Program
 
     private static async Task Main()
     {
+        // TODO: only get new files if changes
+
+
         Console.WriteLine("Gettings files... ");
         GoogleCredential credential = DriveHelper.GetGoogleCreds();
         var fileList = await DriveHelper.GetFileList(credential);
@@ -35,7 +40,8 @@ internal static class Program
         parsedBusinessFileList.Sort((a, b) => a.MetaData.Date < b.MetaData.Date ? -1 : 1);
 
         var techFileList = DriveHelper.GetDirFilesByParentId(fileList, TECH_DIR_ID);
-        var parsedTechFileList = techFileList.Select(f => DriveHelper.ParseFile(f, credential, imageMetadataList)).ToList();
+        var parsedTechFileList =
+            techFileList.Select(f => DriveHelper.ParseFile(f, credential, imageMetadataList)).ToList();
         parsedTechFileList.Sort((a, b) => a.MetaData.Date < b.MetaData.Date ? -1 : 1);
 
         string frontpageHtmlContent =
@@ -43,26 +49,30 @@ internal static class Program
 
         Console.WriteLine("Writing to files...");
         await File.WriteAllTextAsync("index.html", frontpageHtmlContent);
-        
+
         // TODO: next / prev buttons
-        
-        foreach (ParsedFile parsedFile in parsedBusinessFileList) {
+
+        foreach (ParsedFile parsedFile in parsedBusinessFileList)
+        {
             if (parsedFile.MetaData.State == ArticleState.Draft) continue;
             Directory.CreateDirectory($"{parsedFile.MetaData.UrlPath}");
             await File.WriteAllTextAsync($"{parsedFile.MetaData.UrlPath}/index.html",
                 parsedFile.HtmlContent);
         }
 
-        foreach (ParsedFile parsedFile in parsedTechFileList) {
+        foreach (ParsedFile parsedFile in parsedTechFileList)
+        {
             if (parsedFile.MetaData.State == ArticleState.Draft) continue;
             Directory.CreateDirectory($"{parsedFile.MetaData.UrlPath}");
             await File.WriteAllTextAsync($"{parsedFile.MetaData.UrlPath}/index.html",
                 parsedFile.HtmlContent);
         }
+
         Console.WriteLine("Done");
     }
 
-    private static async Task<List<ImageMetadata>> SaveArticleImages(IList<DriveFile> fileList, GoogleCredential credential)
+    private static async Task<List<ImageMetadata>> SaveArticleImages(IList<DriveFile> fileList,
+        GoogleCredential credential)
     {
         Directory.CreateDirectory("images");
 
@@ -70,20 +80,27 @@ internal static class Program
 
         var businessFileList = DriveHelper.GetDirFilesByParentId(fileList, BUSINESS_DIR_ID);
         var techFileList = DriveHelper.GetDirFilesByParentId(fileList, TECH_DIR_ID);
-        foreach (var file in techFileList.Concat(businessFileList)) {
+        foreach (var file in techFileList.Concat(businessFileList))
+        {
             var doc = DriveHelper.GetDoc(credential, file.Id);
 
             // save article images for later reuse
             if (doc.InlineObjects is null) continue;
-            foreach (KeyValuePair<string, InlineObject> o in doc.InlineObjects) {
-                var imageContentUri =
-                    o.Value.InlineObjectProperties.EmbeddedObject.ImageProperties.ContentUri;
-                var imageBytes = await new HttpClient().GetByteArrayAsync(imageContentUri);
-                await File.WriteAllBytesAsync($"images/{o.Key.Replace(".", "_")}.png", imageBytes);
-                imageMetadataList.Add(new ImageMetadata {
-                    Id = o.Key,
-                    WidthPx = o.Value.InlineObjectProperties.EmbeddedObject.Size.Width.Magnitude * 2,
-                    HeighPx = o.Value.InlineObjectProperties.EmbeddedObject.Size.Height.Magnitude * 2
+            foreach (var (key, inlineObject) in doc.InlineObjects)
+            {
+                var imgPath = $"images/{key.Replace(".", "_")}.png";
+                if (!File.Exists(imgPath))
+                {
+                    var imageContentUri = inlineObject.InlineObjectProperties.EmbeddedObject.ImageProperties.ContentUri;
+                    var imageBytes = await new HttpClient().GetByteArrayAsync(imageContentUri);
+                    await File.WriteAllBytesAsync(imgPath, imageBytes);
+                    Console.WriteLine($"Saved image: {imgPath}");
+                }
+                imageMetadataList.Add(new ImageMetadata
+                {
+                    Id = key,
+                    WidthPx = inlineObject.InlineObjectProperties.EmbeddedObject.Size.Width.Magnitude * 2,
+                    HeighPx = inlineObject.InlineObjectProperties.EmbeddedObject.Size.Height.Magnitude * 2
                 });
             }
         }

@@ -23,7 +23,8 @@ Below goes in file: `creds/credentials.json`
         }
     }
 
-Below goes in file: `creds/service-account-creds.json`
+
+Generate new key from https://console.cloud.google.com/iam-admin/serviceaccounts/details/100644952213262633305;edit=true/keys?project=static-blog-generator and save to file: `creds/service-account-creds.json`
 
     {
         "type": "service_account",

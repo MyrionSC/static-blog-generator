@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace static_blog_generator;
+namespace static_blog_generator.Models;
 
 public record ArticleMetaData
 {

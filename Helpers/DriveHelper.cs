@@ -10,9 +10,10 @@ using Google.Apis.Docs.v1.Data;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Newtonsoft.Json;
+using static_blog_generator.Models;
 using DriveFile = Google.Apis.Drive.v3.Data.File;
 
-namespace static_blog_generator;
+namespace static_blog_generator.Helpers;
 
 public static class DriveHelper
 {

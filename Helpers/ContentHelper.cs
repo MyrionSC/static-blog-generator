@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Google.Apis.Docs.v1.Data;
+using static_blog_generator.Extensions;
+using static_blog_generator.Models;
 
-namespace static_blog_generator;
+namespace static_blog_generator.Helpers;
 
 public static class ContentHelper
 {

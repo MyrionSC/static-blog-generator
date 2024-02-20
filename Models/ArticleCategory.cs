@@ -1,7 +1,7 @@
-﻿namespace static_blog_generator;
+﻿namespace static_blog_generator.Models;
 
 public enum ArticleCategory
 {
-    Finance,
+    Business,
     Tech
 }
