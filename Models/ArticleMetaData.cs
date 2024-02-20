@@ -9,4 +9,6 @@ public record ArticleMetaData
     public ArticleCategory Category { get; set; }
     public DateTime Date { get; set; }
     public string UrlPath { get; set; }
+    public string PrevLink { get; set; } = null;
+    public string NextLink { get; set; } = null;
 }
