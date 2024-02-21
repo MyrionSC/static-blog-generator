@@ -103,13 +103,13 @@ public static class ContentHelper
 
     private static void AddLinks(StringBuilder stringBuilder, ArticleMetaData articleMetaData)
     {
-        var aHrefArticlemetadataPrevlinkPreviousA = articleMetaData.PrevLink is not null ? $"<a href='{articleMetaData.PrevLink}'>Previous</a>" : "<div/>";
-        var aHrefArticlemetadataNextlinkNextA = articleMetaData.NextLink is not null ? $"<a href='{articleMetaData.NextLink}'>Next</a>" : "<div/>";
+        var prevTag = !string.IsNullOrWhiteSpace(articleMetaData.PrevLink) ? $"<a href='{articleMetaData.PrevLink}'>Previous</a>" : "<div></div>";
+        var nextTag = !string.IsNullOrWhiteSpace(articleMetaData.NextLink) ? $"<a href='{articleMetaData.NextLink}'>Next</a>" : "<div></div>";
         stringBuilder.Append(
             $"""
              <div class="d-flex mt-2 justify-content-between">
-                {aHrefArticlemetadataPrevlinkPreviousA}
-                {aHrefArticlemetadataNextlinkNextA}
+                {prevTag}
+                {nextTag}
              </div>
              """
         );
