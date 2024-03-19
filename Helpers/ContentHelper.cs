@@ -120,7 +120,7 @@ public static class ContentHelper
         List<ImageMetadata> imageMetadataList)
     {
         if (!documentIter.MoveNext()) return;
-        begin:
+        begin: // Holy mother of sins
         var ele = documentIter.Current!;
 
         // HEADER
@@ -171,7 +171,11 @@ public static class ContentHelper
         // NORMAL
         else if (ele.Paragraph.ParagraphStyle.NamedStyleType == "NORMAL_TEXT")
         {
-            if (IsLineBreak(ele.Paragraph.Elements))
+            if (ele.Paragraph.Elements.First().TextRun.Content.Trim().StartsWith("##"))
+            {
+                Console.WriteLine("-- Skipping comment denoted by ##");
+            }
+            else if (IsLineBreak(ele.Paragraph.Elements))
             {
                 stringBuilder.Append("""<div class="separator"></div>""");
             }

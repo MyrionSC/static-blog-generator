@@ -61,6 +61,7 @@ public static class DriveHelper
         var metaDataString = GetTextInElementList(metaDataElementList);
         var metaData = JsonConvert.DeserializeObject<ArticleMetaData>(metaDataString)!;
         metaData.UrlPath = $"articles/{metaData.Title.Replace(" ", "-").ToLower()}";
+        Console.WriteLine($"- {metaData.Title}");
 
         // find and parse article content
         var actualDocumentList = contentList
