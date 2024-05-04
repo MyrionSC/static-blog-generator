@@ -41,7 +41,7 @@ public static class ContentHelper
                     <title>Marand's blog</title>
                     <meta name="viewport" content="width=device-width,initial-scale=1">
                     <link rel=preload href="static/JetBrainsMono-Regular.woff2" as=font type=font/woff2>
-                    <link rel="stylesheet" href="static/style.css">
+                    <link rel="stylesheet" href="static/style.css?random={new Random().Next().ToString()}">
                 </head>
                 <body class="max-width mx-auto px3 ltr">
                 <div class="content index py-4 pt-xs-2">
