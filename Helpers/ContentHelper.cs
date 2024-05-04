@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Google.Apis.Docs.v1.Data;
-using Newtonsoft.Json;
 using static_blog_generator.Extensions;
 using static_blog_generator.Models;
 
@@ -79,7 +78,7 @@ public static class ContentHelper
     {
         var stringBuilder = new StringBuilder();
         using var documentIter = documentContentList.GetEnumerator();
-        BuildHtmlFromDocumentEnumerator(stringBuilder, documentIter, imageMetadataList);
+        BuildHtmlFromDocumentEnumerator(stringBuilder, documentIter, imageMetadataList, articleMetaData);
         AddLinks(stringBuilder, articleMetaData);
 
         return $$"""
@@ -103,8 +102,12 @@ public static class ContentHelper
 
     private static void AddLinks(StringBuilder stringBuilder, ArticleMetaData articleMetaData)
     {
-        var prevTag = !string.IsNullOrWhiteSpace(articleMetaData.PrevLink) ? $"<a href='{articleMetaData.PrevLink}'>Previous</a>" : "<div></div>";
-        var nextTag = !string.IsNullOrWhiteSpace(articleMetaData.NextLink) ? $"<a href='{articleMetaData.NextLink}'>Next</a>" : "<div></div>";
+        var prevTag = !string.IsNullOrWhiteSpace(articleMetaData.PrevLink)
+            ? $"<a href='{articleMetaData.PrevLink}'>Previous</a>"
+            : "<div></div>";
+        var nextTag = !string.IsNullOrWhiteSpace(articleMetaData.NextLink)
+            ? $"<a href='{articleMetaData.NextLink}'>Next</a>"
+            : "<div></div>";
         stringBuilder.Append(
             $"""
              <div class="d-flex mt-2 justify-content-between">
@@ -116,8 +119,8 @@ public static class ContentHelper
     }
 
     private static void BuildHtmlFromDocumentEnumerator(StringBuilder stringBuilder,
-        IEnumerator<StructuralElement> documentIter,
-        List<ImageMetadata> imageMetadataList)
+        IEnumerator<StructuralElement> documentIter, List<ImageMetadata> imageMetadataList,
+        ArticleMetaData articleMetaData)
     {
         if (!documentIter.MoveNext()) return;
         begin: // Holy mother of sins
@@ -126,7 +129,12 @@ public static class ContentHelper
         // HEADER
         if (ele.Paragraph.ParagraphStyle.NamedStyleType == "HEADING_2")
         {
-            stringBuilder.Append($"<h1>{ele.Paragraph.Elements.First().TextRun.Content}</h1>");
+            stringBuilder.Append($"""
+                                  <div class='d-md-flex justify-content-between align-flex-end'>
+                                    <h1>{ele.Paragraph.Elements.First().TextRun.Content}</h1>
+                                    <span class='mb-3 mr3rem color-green'>{articleMetaData.Date.ToString("d/M/yyyy")}</span>
+                                  </div>
+                                  """);
         }
 
         // LIST
@@ -185,7 +193,7 @@ public static class ContentHelper
             }
         }
 
-        BuildHtmlFromDocumentEnumerator(stringBuilder, documentIter, imageMetadataList);
+        BuildHtmlFromDocumentEnumerator(stringBuilder, documentIter, imageMetadataList, articleMetaData);
     }
 
     private static bool IsLineBreak(IList<ParagraphElement> paragraphElements)

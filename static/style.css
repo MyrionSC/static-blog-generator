@@ -145,6 +145,10 @@ li {
     margin-right: 0.5rem;
 }
 
+.mr3rem {
+    margin-right: 2rem;
+}
+
 .separator {
     height: 0.25rem;
 }
@@ -173,6 +177,18 @@ li {
     justify-content: space-between;
 }
 
+.align-flex-end {
+    align-items: flex-end;
+}
+
 .mb-2 {
     margin-bottom: 0.5rem
+}
+
+.mb-3 {
+    margin-bottom: 1rem
+}
+
+.color-green {
+    color: #2bbc8a;
 }
